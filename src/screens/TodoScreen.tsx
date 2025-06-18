@@ -1,26 +1,34 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import {addTodo, deleteTodo, getTodos, updateTodo, updateTodoStatus} from '../database/TodoServices'
+import { useNavigation } from '@react-navigation/native'
+import { RootStackParamList } from '../Types/RootStackParamList'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
-const tasks = [
-  { id: '1', title: 'Học React Native' },
-  { id: '2', title: 'Làm bài tập' },
-  { id: '3', title: 'Đọc tài liệu expo-sqlite' },
-];
+type TodoScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'TodoScreen'>
 
 const TodoScreen = () => {
+  const [todos, setTodos] = useState([])
+  const navigation = useNavigation<TodoScreenNavigationProp>();
+
   return (
     <View>
-    <Text style={{ fontSize: 24, fontWeight: 'bold', margin: 16 }}>Todo List</Text>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', margin: 16 }}>Todo List</Text>
       <FlatList
-      data={tasks}
-      keyExtractor={item => item.id}
+      data={todos}
+      keyExtractor={item => item.id.toString()}
       renderItem={({ item }) => (
         <View style={styles.taskItem}>
           <Text style={styles.taskText}>{item.title}</Text>
+          <Text>{item.completed ? '[Done]' : '[]'}</Text>
         </View>
       )}
       contentContainerStyle={styles.listContainer}
-    />
+      />
+      <TouchableOpacity style={styles.fab}
+                        onPress={() => navigation.navigate('TaskDetailScreen')}>
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
     </View>
   )
 }
@@ -44,5 +52,22 @@ const styles = StyleSheet.create({
   },
   taskText: {
     fontSize: 16,
+  },
+  fab: {
+    position: 'absolute',
+    right: 40,
+    top: 660,
+    backgroundColor: '#add8e6',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 5,
+  },
+  fabText: {
+    color: '#fff',
+    fontSize: 32,
+    fontWeight: 'bold',
   },
 })
