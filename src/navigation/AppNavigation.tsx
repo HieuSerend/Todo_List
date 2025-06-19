@@ -11,7 +11,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 // Tab Navigator
 function MainTabs() {
   return (
-    <Tab.Navigator id={undefined}>
+    <Tab.Navigator id={undefined} screenOptions={{headerShown: false}}>
       <Tab.Screen name="TodoList" component={TodoScreen} />
       <Tab.Screen name="Settings" component={SettingScreen} />
     </Tab.Navigator>

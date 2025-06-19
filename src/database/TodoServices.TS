@@ -5,7 +5,7 @@ export interface Todo {
     id: number;
     title: string;
     description: string;
-    deadline: String;
+    deadline: string;
     completed: boolean;
 };
 
@@ -85,5 +85,17 @@ export const getTodos = async (db: SQLiteDatabase): Promise<Todo[]> => {
   } catch (error) {
     console.error(error)
     throw Error("Failed to get tasks from database")
+  }
+}
+
+export const getDealine = async (db: SQLiteDatabase, todo: Todo) => {
+  const insertQuery = `
+    SELECT deadline FROM todos WHERE id = ?
+  `
+  const values = [todo.id]
+  try {
+    db.executeSql(insertQuery, values)
+  } catch(error) {
+    throw Error("Failed to get deadline")
   }
 }
