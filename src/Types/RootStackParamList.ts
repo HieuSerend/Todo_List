@@ -1,6 +1,6 @@
 export type RootStackParamList = {
     TodoScreen: undefined;
-    TaskDetailScreen: undefined;
+    TaskDetailScreen: {id?: number};
 }
 
 export type MainTabParamList = {
