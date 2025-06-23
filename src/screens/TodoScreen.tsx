@@ -1,20 +1,23 @@
-import { FlatList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState, useCallback, useRef } from 'react'
 import { deleteTodo, getTodos, Todo, updateTodoStatus } from '../database/TodoServices'
 import { useNavigation } from '@react-navigation/native'
 import { RootStackParamList } from '../Types/RootStackParamList'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import TodoCard from '../components/TodoCard'
 import { useDatabase } from '../database/databaseContext'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useFocusEffect } from '@react-navigation/native'
 import Swipeable from 'react-native-gesture-handler/Swipeable'
+import TodoCard from '../components/TodoCard'
+import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
 
 type TodoScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'TodoScreen'>
 
 const TodoScreen = () => {
   const [todos, setTodos] = useState<Todo[]>([])
-  const swipeableRef = useRef<Swipeable>(null)
+  const swipeableRefs = useRef<{
+    [key: number]: Swipeable | null
+  }>({})
   const navigation = useNavigation<TodoScreenNavigationProp>();
   const db = useDatabase()
 
@@ -53,26 +56,30 @@ const TodoScreen = () => {
     setTodos(todoList)
   }
 
-  const renderTaskItem = ({ item }: { item: typeof todos[0] }) => (
-    <Swipeable 
-      ref={swipeableRef}
+  const renderTaskItems = ({item, drag}: RenderItemParams<Todo>) => (
+    <Swipeable
+      ref={ref => {swipeableRefs.current[item.id] = ref}}
       renderLeftActions={renderLeftActions}
       renderRightActions={renderRightActions}
       onSwipeableOpen={(direction) => {
         if (direction === 'left') {
           handleComplete(item.id)
-          swipeableRef.current?.close()
+          swipeableRefs.current[item.id]?.close()
         }
         if (direction === 'right') {
           handleDelete(item.id)
-          swipeableRef.current?.close()
+          swipeableRefs.current[item.id]?.close() 
         }
-      }}>
+      }}
+    >
       <TodoCard
         title={item.title}
         deadline={item.deadline}
         completed={item.completed}
-        onPress={() => navigation.navigate('TaskDetailScreen', { id: item.id })}
+        onPress={() => navigation.navigate("TaskDetailScreen", { id: item.id })}
+        onLongPress={() => {
+          drag()
+        }}
       />
     </Swipeable>
   )
@@ -91,13 +98,16 @@ const TodoScreen = () => {
         {todos.length === 0 ? (
           <Text style={styles.noneTaskText}>Không có task nào, ấn nút phía dưới để thêm task mới!</Text>
         ) : (
-          <FlatList style={styles.taskItem}
+          <DraggableFlatList style={styles.taskItem}
             data={todos}
             keyExtractor={item => item.id.toString()}
-            renderItem={renderTaskItem}
+            renderItem={renderTaskItems}
             contentContainerStyle={styles.listContainer}
             ItemSeparatorComponent={() => <View style={styles.separator} />
             }
+            onDragEnd={({data}) => {
+              setTodos(data)
+            }}
           />
         )}
 

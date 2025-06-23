@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { RootStackParamList } from '../Types/RootStackParamList'
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { addTodo, getTodoById, updateTodo } from '../database/TodoServices';
+import { addTodo, getTodoById, updateTodo, updateTodoStatus } from '../database/TodoServices';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useDatabase } from '../database/databaseContext';
 
@@ -15,7 +15,9 @@ const TaskDetailScreen = () => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [deadline, setDeadline] = useState<Date>(new Date())
-  const [showPicker, setShowPicker] = useState(false)
+  const [showDatePicker, setShowDatePicker] = useState(false)
+  const [showTimePicker, setShowTimePicker] = useState(false)
+  const [completed, setCompleted] = useState(false)
   const navigation = useNavigation<TaskDetailScreenNavigationProp>()
   const db = useDatabase()
 
@@ -27,6 +29,7 @@ const TaskDetailScreen = () => {
           setTitle(todo.title)
           setDescription(todo.description)
           setDeadline(new Date(todo.deadline))
+          setCompleted(!!todo.completed)
         }
       }
       loadTodo()
@@ -55,10 +58,23 @@ const TaskDetailScreen = () => {
     navigation.goBack()
   }
 
-  const onChange = (event: any, selectedDate?: Date) => {
-    setShowPicker(Platform.OS === 'android')
+  const handleStatus = async () => {
+    const todo = await getTodoById(db, id)
+    if (todo.completed) {
+      await updateTodoStatus(db, 0, id)
+      setCompleted(false)
+    } else {
+      await updateTodoStatus(db, 1, id)
+      setCompleted(true)
+    }
+    navigation.goBack()
+  }
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'android')
     if (selectedDate) setDeadline(selectedDate)
-    setShowPicker(false)
+    setShowDatePicker(false)
+    setShowTimePicker(false)
   }
 
   return (
@@ -105,9 +121,11 @@ const TaskDetailScreen = () => {
         {/* Deadline Section */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Deadline</Text>
-          <TouchableOpacity
+          {/**Date*/}
+          <View style={styles.deadlineButtonContainer}> 
+            <TouchableOpacity
             style={styles.deadlineButton}
-            onPress={() => setShowPicker(true)}
+            onPress={() => setShowDatePicker(true)}
           >
             <Text style={styles.deadlineText}>
               {deadline.toLocaleDateString('vi-VN', {
@@ -117,19 +135,42 @@ const TaskDetailScreen = () => {
                 day: 'numeric'
               })}
             </Text>
-            <Text style={styles.deadlineIcon}>📅</Text>
           </TouchableOpacity>
+
+          {/**Time*/}
+          <TouchableOpacity
+            style={styles.deadlineButton}
+            onPress={() => setShowTimePicker(true)}
+          >
+            <Text style={styles.deadlineText}>
+              {deadline.toLocaleTimeString('vi-VN', {
+                hourCycle:'h24'
+              })}
+            </Text>
+          </TouchableOpacity>
+          </View>
         </View>
         {/* Date Picker */}
-        {showPicker && (
+        {showDatePicker && (
           <DateTimePicker
             value={deadline}
             mode='date'
-            display='default'
-            onChange={onChange}
+            display='calendar'
+            onChange={onDateChange}
             minimumDate={new Date()}
+          />)
+        }
+        {/* Time Picker */}
+        {showTimePicker && (
+          <DateTimePicker
+            is24Hour={true}
+            value={deadline}
+            mode='time'
+            display='clock'
+            onChange={onDateChange}
           />
-        )}
+        )
+        }
 
         {/* Save Button */}
         <TouchableOpacity
@@ -141,6 +182,18 @@ const TaskDetailScreen = () => {
             {id ? 'Cập nhật Task' : 'Tạo Task'}
           </Text>
         </TouchableOpacity>
+
+        {/* Mark as completed button */}
+        {id && (
+          <TouchableOpacity
+            style={styles.markCompleteButton}
+            onPress={handleStatus}
+          >
+            <Text style={styles.markCompleteText}>
+              {completed ? 'Đánh dấu là chưa hoàn thành' : 'Đánh dấu là đã hoàn thành'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   )
@@ -245,4 +298,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  markCompleteButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 60
+  },
+  markCompleteText: {
+    color: '#6F8FAF',
+  },
+  deadlineButtonContainer: {
+    flexDirection: 'row',
+    marginBottom: 24,
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  }
 })

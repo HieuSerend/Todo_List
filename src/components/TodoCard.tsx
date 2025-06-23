@@ -5,10 +5,11 @@ interface TaskProps {
   title: string,
   deadline: string,
   completed: boolean,
-  onPress?: () => void;
+  onPress?: () => void,
+  onLongPress?: () => void,
 }
 
-const TodoCard = ({ title, deadline, completed, onPress }: TaskProps) => {
+const TodoCard = ({ title, deadline, completed, onPress, onLongPress }: TaskProps) => {
   const date = new Date(deadline)
 
   const days = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy']
@@ -16,15 +17,21 @@ const TodoCard = ({ title, deadline, completed, onPress }: TaskProps) => {
 
   const day = date.getDate()
   const month = date.getMonth() + 1
-
+  const hour = date.getHours().toString().padStart(2, '0')
+  const minute = date.getMinutes().toString().padStart(2, '0')
+  const timeString = `${hour}:${minute}`
+  
   return (
-      <TouchableOpacity style={[styles.card, completed && styles.cardCompleted]} onPress={onPress}>
+      <TouchableOpacity style={[styles.card, completed && styles.cardCompleted]} 
+      onPress={onPress}
+      onLongPress={onLongPress}
+      >
         <View style={styles.leftSection}>
           <Text style={[styles.title, completed && styles.titleCompleted]}>
             {title}
           </Text>
           <Text style={styles.deadline}>
-            {dayOfWeek}, {day}/{month} 
+          Hạn tới: {timeString}, {dayOfWeek}, {day}/{month}
           </Text>
         </View>
         <View>

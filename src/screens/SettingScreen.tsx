@@ -1,8 +1,7 @@
-// src/screens/SettingScreen.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const APP_VERSION = '1.0.0'; // You can update this as needed
+const APP_VERSION = '1.0.0'; 
 
 const SettingScreen = () => {
   return (
