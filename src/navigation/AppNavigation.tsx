@@ -22,7 +22,7 @@ function MainTabs() {
         }
         return <MaterialIcons name={iconName} size={size} color={color} />;
       },
-      tabBarActiveTintColor: 'blue',
+      tabBarActiveTintColor: 'black',
       tabBarInactiveTintColor: 'gray',
     })}>
       <Tab.Screen name="TodoList" component={TodoScreen} />

@@ -1,6 +1,6 @@
 import { StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState, useCallback, useRef } from 'react'
-import { deleteTodo, getTodos, Todo, updateTodoStatus } from '../database/TodoServices'
+import { deleteTodo, getTodos, Todo, updateTodoStatus, getTodosByDeadlineAsc, updateTodoOrder } from '../database/TodoServices'
 import { useNavigation } from '@react-navigation/native'
 import { RootStackParamList } from '../Types/RootStackParamList'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -15,6 +15,7 @@ type TodoScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'T
 
 const TodoScreen = () => {
   const [todos, setTodos] = useState<Todo[]>([])
+  const [isReordering, setIsReordering] = useState(false)
   const swipeableRefs = useRef<{
     [key: number]: Swipeable | null
   }>({})
@@ -24,11 +25,13 @@ const TodoScreen = () => {
   useFocusEffect(
     useCallback(() => {
       const fetchTodos = async () => {
-        const todoList = await getTodos(db)
-        setTodos(todoList)
+        if (!isReordering) {
+          const todoList = await getTodos(db)
+          setTodos(todoList)
+        }
       }
       fetchTodos()
-    }, [db])
+    }, [db, isReordering])
   )
 
 
@@ -54,6 +57,27 @@ const TodoScreen = () => {
     await updateTodoStatus(db, 1, id)
     const todoList = await getTodos(db)
     setTodos(todoList)
+  }
+
+  const handleArrangeByDeadline = async () => {
+    setIsReordering(true)
+    const todoList = await getTodosByDeadlineAsc(db)
+    setTodos(todoList)
+    setIsReordering(false)
+  }
+
+  const handleDragEnd = async (data: Todo[]) => {
+    setIsReordering(true)
+    setTodos(data)
+    try {
+      await updateTodoOrder(db, data)
+    } catch(error) {
+      console.log(error)
+      const originalTodos = await getTodos(db)
+      setTodos(originalTodos)
+    } finally {
+      setIsReordering(false)
+    }
   }
 
   const renderTaskItems = ({item, drag}: RenderItemParams<Todo>) => (
@@ -93,6 +117,13 @@ const TodoScreen = () => {
         <Text style={styles.headerTitle}>Todo List</Text>
       </View>
 
+      {/* Sort by deadline button */}
+      <View style={styles.sortByDeadlineContainer}>
+        <TouchableOpacity onPress={handleArrangeByDeadline}>
+          <Text style={styles.sortByDeadlineText}>Sắp xếp theo deadline</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Task List */}
       <View style={styles.taskListContainer}>
         {todos.length === 0 ? (
@@ -105,9 +136,7 @@ const TodoScreen = () => {
             contentContainerStyle={styles.listContainer}
             ItemSeparatorComponent={() => <View style={styles.separator} />
             }
-            onDragEnd={({data}) => {
-              setTodos(data)
-            }}
+            onDragEnd={({data}) => handleDragEnd(data)}
           />
         )}
 
@@ -141,6 +170,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#212529',
   },
+  sortByDeadlineContainer: {
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  sortByDeadlineText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#89CFF0',
+  },
   taskListContainer: {
     flex: 1,
   },
@@ -167,7 +208,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 40,
-    top: 660,
+    top: 580,
     width: 56,
     height: 56,
     alignItems: 'center',

@@ -23,7 +23,8 @@ export const createTables = async (db: SQLiteDatabase) => {
                     title TEXT,
                     description TEXT,
                     deadline TEXT,
-                    completed INTEGER DEFAULT 0)`
+                    completed INTEGER DEFAULT 0,
+                    display_order INTEGER DEFAULT 0)`
   try {
     await db.executeSql(createTable)
   } catch (error) {

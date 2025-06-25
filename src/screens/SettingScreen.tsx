@@ -20,9 +20,9 @@ export default SettingScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
     padding: 24,
     justifyContent: 'flex-start',
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,

@@ -37,25 +37,34 @@ const TaskDetailScreen = () => {
   }, [db, id])
 
   const handleUpdate = async () => {
-    await updateTodo(db, {
-      id,
-      title,
-      description,
-      deadline: deadline.toISOString(),
-      completed: false
-    })
-    navigation.goBack()
+    try {
+      
+      await updateTodo(db, {
+        id,
+        title,
+        description,
+        deadline: deadline.toISOString(),
+        completed: false
+      })
+      navigation.goBack()
+    } catch(error) {
+      console.log(error)
+    }
   }
 
   const handleAdd = async () => {
-    await addTodo(db, {
-      id,
-      title,
-      description,
-      deadline: deadline.toISOString(),
-      completed: false
-    })
-    navigation.goBack()
+    try {
+      await addTodo(db, {
+        id,
+        title,
+        description,
+        deadline: deadline.toISOString(),
+        completed: false,
+      })
+      navigation.goBack()
+    } catch(error) {
+      console.log(error)
+    }
   }
 
   const handleStatus = async () => {
@@ -218,6 +227,9 @@ const styles = StyleSheet.create({
   backButton: {
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 5,
+    paddingHorizontal: 5,
   },
   backButtonText: {
     fontSize: 24,
@@ -302,7 +314,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 60
+    marginTop: 60,
+    paddingVertical: 16,
+    backgroundColor: '#f8f9fa',
+
   },
   markCompleteText: {
     color: '#6F8FAF',

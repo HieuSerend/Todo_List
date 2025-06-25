@@ -7,18 +7,27 @@ export interface Todo {
   description: string;
   deadline: string;
   completed: boolean;
+  display_order?: number;
 };
 
 export const addTodo = async (db: SQLiteDatabase, todo: Todo) => {
+  const maxOrderQuery = `
+    SELECT MAX(display_order) as max_order FROM todos
+  `
+  const maxOrderResult = await db.executeSql(maxOrderQuery)
+  const maxOrder = maxOrderResult[0]?.rows?.item(0)?.max_order || 0
+  const newOrder = maxOrder + 1
+  
   const insertQuery = `
-   INSERT INTO todos (title, description, deadline, completed)
-   VALUES (?, ?, ?, ?)
+   INSERT INTO todos (title, description, deadline, completed, display_order)
+   VALUES (?, ?, ?, ?, ?)
  `
   const values = [
     todo.title,
     todo.description,
     todo.deadline,
-    todo.completed
+    todo.completed,
+    newOrder
   ]
   try {
     return db.executeSql(insertQuery, values)
@@ -34,7 +43,9 @@ export const deleteTodo = async (db: SQLiteDatabase, id: number) => {
     `
   const values = [id]
   try {
-    return db.executeSql(insertQuery, values)
+    await db.executeSql(insertQuery, values)
+    const remainingTodos = await getTodos(db)
+    await updateTodoOrder(db, remainingTodos)
   } catch (error) {
     throw Error("Failed to delete todo")
   }
@@ -52,7 +63,9 @@ export const updateTodo = async (db: SQLiteDatabase, updatedTodo: Todo) => {
     updatedTodo.id
   ]
   try {
-    db.executeSql(insertQuery, values)
+    await db.executeSql(insertQuery, values)
+    const remainingTodos = await getTodos(db)
+    await updateTodoOrder(db, remainingTodos)
   } catch (error) {
     throw Error("Failed to update todo")
   }
@@ -67,7 +80,9 @@ export const updateTodoStatus = async (db: SQLiteDatabase, completed: number, id
     id,
   ]
   try {
-    db.executeSql(insertQuery, values)
+    await db.executeSql(insertQuery, values)
+    const remainingTodos = await getTodos(db)
+    await updateTodoOrder(db, remainingTodos)
   } catch (error) {
     throw Error("Failed to update todo status")
   }
@@ -75,7 +90,7 @@ export const updateTodoStatus = async (db: SQLiteDatabase, completed: number, id
 
 export const getTodos = async (db: SQLiteDatabase): Promise<Todo[]> => {
   const query = `
-    SELECT * FROM todos ORDER BY deadline ASC
+    SELECT * FROM todos ORDER BY display_order ASC
   `
   try {
     const todoList: Todo[] = []
@@ -121,5 +136,38 @@ export const getTodoById = async (db: SQLiteDatabase, id: number) => {
     return null
   } catch (error) {
     throw Error("Failed to get todo by id")
+  }
+}
+
+export const updateTodoOrder = async (db: SQLiteDatabase, todos: Todo[]) => {
+  try {
+    await db.executeSql(`BEGIN TRANSACTION`)
+    for (let index = 0; index < todos.length; index++) {
+      const todoItem = todos[index]
+      await db.executeSql(`UPDATE todos SET display_order = ? WHERE id = ?`, [index+1, todoItem.id])
+    }
+    await db.executeSql(`COMMIT`)
+  } catch (error) {
+    await db.executeSql(`ROLLBACK`)
+    throw Error("Failed to update todo order")
+  }
+}
+
+export const getTodosByDeadlineAsc = async (db: SQLiteDatabase): Promise<Todo[]> => {
+  const query = `
+    SELECT * FROM todos ORDER BY deadline ASC
+  `
+  try {
+    const todoList: Todo[] = []
+    const result = await db.executeSql(query)
+    result?.forEach((result) => {
+      for (let index = 0; index < result.rows.length; index++) {
+        todoList.push(result.rows.item(index))
+      }
+    })
+    await updateTodoOrder(db, todoList)
+    return todoList
+  } catch (error) {
+    throw Error("Failed to get todos by deadline asc")
   }
 }
