@@ -5,12 +5,15 @@ import SettingScreen from '../screens/SettingScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { Colors } from '../utils/Colors';
+import { useTheme } from '../Context/ThemeContext';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 // Tab Navigator
 function MainTabs() {
+  const { theme } = useTheme()
   return (
     <Tab.Navigator id={undefined} screenOptions={({route}) => ({ headerShown: false,
       tabBarIcon: ({focused, color, size}) => {
@@ -22,9 +25,14 @@ function MainTabs() {
         }
         return <MaterialIcons name={iconName} size={size} color={color} />;
       },
-      tabBarActiveTintColor: 'black',
-      tabBarInactiveTintColor: 'gray',
-    })}>
+      tabBarActiveTintColor: theme === 'light' ? Colors.light.text : Colors.dark.text,
+      tabBarInactiveTintColor: theme === 'light' ? Colors.light.textSecondary : Colors.dark.textSecondary,
+      tabBarStyle: {
+        backgroundColor: theme === 'light' ? Colors.light.secondary : Colors.dark.secondary,
+        borderTopColor: theme === 'light' ? Colors.light.border : Colors.dark.border,
+      }
+    })}
+    >
       <Tab.Screen name="TodoList" component={TodoScreen} />
       <Tab.Screen name="Settings" component={SettingScreen} />
     </Tab.Navigator>

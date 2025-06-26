@@ -1,7 +1,7 @@
-import { StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState, useCallback, useRef } from 'react'
 import { deleteTodo, getTodos, Todo, updateTodoStatus, getTodosByDeadlineAsc, updateTodoOrder } from '../database/TodoServices'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation} from '@react-navigation/native'
 import { RootStackParamList } from '../Types/RootStackParamList'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useDatabase } from '../database/databaseContext'
@@ -10,10 +10,13 @@ import { useFocusEffect } from '@react-navigation/native'
 import Swipeable from 'react-native-gesture-handler/Swipeable'
 import TodoCard from '../components/TodoCard'
 import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist'
+import { useTheme } from '../Context/ThemeContext'
+import { Colors } from '../utils/Colors'
 
 type TodoScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'TodoScreen'>
 
 const TodoScreen = () => {
+  const {theme} = useTheme()
   const [todos, setTodos] = useState<Todo[]>([])
   const [isReordering, setIsReordering] = useState(false)
   const swipeableRefs = useRef<{
@@ -36,13 +39,15 @@ const TodoScreen = () => {
 
 
   const renderRightActions = () => (
-    <View style={styles.swipeRight}>
+    <View style={[styles.swipeRight, 
+    {backgroundColor: theme === 'light' ? Colors.light.danger : Colors.dark.danger}]}>
       <Text>Xóa</Text>
     </View>
   )
 
   const renderLeftActions = () => (
-    <View style={styles.swipeLeft}>
+    <View style={[styles.swipeLeft, 
+    {backgroundColor: theme === 'light' ? Colors.light.success : Colors.dark.success}]}>
       <Text>Hoàn thành</Text>
     </View>
   )
@@ -109,25 +114,27 @@ const TodoScreen = () => {
   )
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
+    <SafeAreaView style={[styles.container, 
+                {backgroundColor: theme === 'light' ? Colors.light.primary : Colors.dark.primary}]}>
 
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Todo List</Text>
+      <View style={[styles.header, 
+                  {backgroundColor: theme === 'light' ? Colors.light.primary : Colors.dark.primary},
+                  {borderBottomColor: theme === 'light' ? Colors.light.border : Colors.dark.border}]}>
+        <Text style={[styles.headerTitle, {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}>Todo List</Text>
       </View>
 
       {/* Sort by deadline button */}
-      <View style={styles.sortByDeadlineContainer}>
+      <View style={[styles.sortByDeadlineContainer, {backgroundColor: theme === 'light' ? Colors.light.primary : Colors.dark.primary}]}>
         <TouchableOpacity onPress={handleArrangeByDeadline}>
-          <Text style={styles.sortByDeadlineText}>Sắp xếp theo deadline</Text>
-        </TouchableOpacity>
+          <Text style={[styles.sortByDeadlineText, {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}>Sắp xếp theo deadline</Text>
+        </TouchableOpacity> 
       </View>
 
       {/* Task List */}
       <View style={styles.taskListContainer}>
         {todos.length === 0 ? (
-          <Text style={styles.noneTaskText}>Không có task nào, ấn nút phía dưới để thêm task mới!</Text>
+          <Text style={[styles.noneTaskText, {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}>Không có task nào, ấn nút phía dưới để thêm task mới!</Text>
         ) : (
           <DraggableFlatList style={styles.taskItem}
             data={todos}
@@ -141,9 +148,9 @@ const TodoScreen = () => {
         )}
 
         {/* Add Task Button */}
-        <TouchableOpacity style={styles.fab}
+        <TouchableOpacity style={[styles.fab, {backgroundColor: theme === 'light' ? Colors.light.accent : Colors.dark.accent}]}
           onPress={() => navigation.navigate('TaskDetailScreen', {})}>
-          <Text style={styles.fabText}>+</Text>
+          <Text style={[styles.fabText, {color: theme === 'light' ? Colors.light.primary : Colors.dark.primary}]}>+</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -155,32 +162,26 @@ export default TodoScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
-    backgroundColor: '#fff',
   },
   headerTitle: {
     marginBottom: 4,
     fontSize: 28,
     fontWeight: '700',
-    color: '#212529',
   },
   sortByDeadlineContainer: {
     paddingHorizontal: 10,
     paddingVertical: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
   },
   sortByDeadlineText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#89CFF0',
   },
   taskListContainer: {
     flex: 1,
@@ -215,16 +216,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 28,
     elevation: 5,
-    backgroundColor: '#add8e6',
     zIndex: 100
   },
   fabText: {
-    color: '#fff',
     fontSize: 32,
     fontWeight: 'bold',
   },
   swipeRight: {
-    backgroundColor: '#ff4d4f',
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
@@ -233,7 +231,6 @@ const styles = StyleSheet.create({
     marginVertical: 6,
   },
   swipeLeft: {
-    backgroundColor: '#90EE90',
     justifyContent: 'center',
     alignItems: 'center',
     width: 100,

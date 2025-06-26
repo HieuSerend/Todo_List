@@ -1,5 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
+import { useTheme } from '../Context/ThemeContext'
+import { Colors } from '../utils/Colors'
 
 interface TaskProps {
   title: string,
@@ -11,7 +13,7 @@ interface TaskProps {
 
 const TodoCard = ({ title, deadline, completed, onPress, onLongPress }: TaskProps) => {
   const date = new Date(deadline)
-
+  const { theme } = useTheme()
   const days = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy']
   const dayOfWeek = days[date.getDay()]
 
@@ -22,23 +24,27 @@ const TodoCard = ({ title, deadline, completed, onPress, onLongPress }: TaskProp
   const timeString = `${hour}:${minute}`
   
   return (
-      <TouchableOpacity style={[styles.card, completed && styles.cardCompleted]} 
+      <TouchableOpacity style={[styles.card, completed && styles.cardCompleted, 
+        {backgroundColor: theme === 'light' ? Colors.light.secondary : Colors.dark.secondary},
+        {borderColor: theme === 'light' ? Colors.light.border : Colors.dark.border}]} 
       onPress={onPress}
       onLongPress={onLongPress}
       >
         <View style={styles.leftSection}>
-          <Text style={[styles.title, completed && styles.titleCompleted]}>
+          <Text style={[styles.title, completed && styles.titleCompleted, 
+            {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}>
             {title}
           </Text>
-          <Text style={styles.deadline}>
+          <Text style={[styles.deadline, {color: theme === 'light' ? Colors.light.textSecondary : Colors.dark.textSecondary}]}>
           Hạn tới: {timeString}, {dayOfWeek}, {day}/{month}
           </Text>
         </View>
         <View>
           {completed ? (
-            <Text style={styles.completedIcon}>✔️</Text>
+            <Text style={[styles.completedIcon, {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}>✔️</Text>
           ) : (
-            <View style={styles.incompleteDot}/>
+            <View style={[styles.incompleteDot, 
+              {backgroundColor: theme === 'light' ? Colors.light.completedDot : Colors.dark.completedDot}]}/>
           )}
         </View>
       </TouchableOpacity>
@@ -51,14 +57,12 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eeeeee',
     borderRadius: 14,
     paddingVertical: 18,
     paddingHorizontal: 20,
     marginBottom: 4,
   },
   cardCompleted: {
-    backgroundColor: '#f1f3f4',
     opacity: 0.7,
   },
   leftSection: {
@@ -67,26 +71,21 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: '600',
-    color: '#222',
     marginBottom: 4,
   },
   titleCompleted: {
     textDecorationLine: 'line-through',
-    color: '#888',
     fontWeight: '400',
   },
   deadline: {
     fontSize: 14,
-    color: '#6c757d',
   },
   completedIcon: {
     fontSize: 22,
-    color: '#28a745',
   },
   incompleteDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#007bff',
   },
 })

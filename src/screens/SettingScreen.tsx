@@ -1,27 +1,58 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useTheme } from '../theme/ThemeContext';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { useTheme } from '../Context/ThemeContext';
+import { Switch } from 'react-native-gesture-handler';
+import { Colors } from '../utils/Colors';
 
-const APP_VERSION = '1.0.0'; 
+const APP_VERSION = '1.0.0';
 
 const SettingScreen = () => {
-  const {theme, toggleTheme} = useTheme()
+  const { theme, toggleTheme } = useTheme()
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
-      <View style={styles.item}>
-        <Text style={styles.label}>App Version</Text>
-        <Text style={styles.value}>{APP_VERSION}</Text>
+    <SafeAreaView style={[styles.container,
+    { backgroundColor: theme === 'light' ? Colors.light.primary : Colors.dark.primary }]}>
+      {/* Header */}
+      <View style={[styles.header,
+      { backgroundColor: theme === 'light' ? Colors.light.primary : Colors.dark.primary },
+      { borderBottomColor: theme === 'light' ? Colors.light.border : Colors.dark.border }]}>
+        <Text style={[styles.title,
+        { color: theme === 'light' ? Colors.light.text : Colors.dark.text }]}>Settings
+        </Text>
       </View>
-      <View style={styles.item}>
-        <Text style={styles.label}>Theme</Text>
-        <Text style={styles.value}>{theme.backgroundColor}</Text>
-        <TouchableOpacity onPress={toggleTheme} style={styles.toggleButton}>
-          <Text style={styles.toggleButtonText}>Change Theme</Text>
-        </TouchableOpacity>
+
+      <View style={styles.contentContainer}>
+        {/* App Version */}
+        <View style={[styles.item,
+        { borderBottomColor: theme === 'light' ? Colors.light.border : Colors.dark.border }]}>
+          <Text style={[styles.label,
+          { color: theme === 'light' ? Colors.light.text : Colors.dark.text }]}>App Version</Text>
+          <Text style={[styles.value,
+          { color: theme === 'light' ? Colors.light.text : Colors.dark.text }]}>{APP_VERSION}</Text>
+        </View>
+
+        {/* Theme Switch */}
+        <View style={[styles.item,
+        { borderBottomColor: theme === 'light' ? Colors.light.border : Colors.dark.border }]}>
+          <Text style={[styles.label,
+          { color: theme === 'light' ? Colors.light.text : Colors.dark.text }]}>Dark mode</Text>
+          <Switch
+            value={theme === 'dark'}
+            onValueChange={() => toggleTheme(theme === 'dark' ? 'light' : 'dark')}
+            trackColor={{ false: '#c5c9c7', true: '#46e071' }} // background color
+            thumbColor={theme === 'dark' ? '#fff' : '#fff'} // circle color
+          />
+        </View>
+
+        {/* Multi-Language */}
+        <View style={[styles.item,
+        { borderBottomColor: theme === 'light' ? Colors.light.border : Colors.dark.border }]}>
+          <Text style={[styles.label,
+          { color: theme === 'light' ? Colors.light.text : Colors.dark.text }]}>Multi-Language</Text>
+        </View>
       </View>
-    </View>
+
+    </SafeAreaView>
   );
 };
 
@@ -30,38 +61,39 @@ export default SettingScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
-    justifyContent: 'flex-start',
-    backgroundColor: '#fff',
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 16,
   },
   title: {
-    fontSize: 24,
+    marginBottom: 4,
+    fontSize: 28,
+    fontWeight: '700',
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+  },
+  subTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 32,
-    color: '#222',
+    marginBottom: 12,
   },
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginBottom: 16,
+
   },
   label: {
     fontSize: 16,
-    color: '#555',
   },
   value: {
     fontSize: 16,
-    color: '#007bff',
     fontWeight: 'bold',
-  },
-  toggleButton: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
-  },
-  toggleButtonText: {
-    color: '#fff',
   },
 });

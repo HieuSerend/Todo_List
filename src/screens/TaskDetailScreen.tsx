@@ -6,6 +6,8 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { addTodo, getTodoById, updateTodo, updateTodoStatus } from '../database/TodoServices';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useDatabase } from '../database/databaseContext';
+import { useTheme } from '../Context/ThemeContext';
+import { Colors } from '../utils/Colors';
 
 type TaskDetailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'TaskDetailScreen'>;
 
@@ -20,7 +22,7 @@ const TaskDetailScreen = () => {
   const [completed, setCompleted] = useState(false)
   const navigation = useNavigation<TaskDetailScreenNavigationProp>()
   const db = useDatabase()
-
+  const { theme } = useTheme()
   useEffect(() => {
     if (db && id) {
       const loadTodo = async () => {
@@ -38,7 +40,7 @@ const TaskDetailScreen = () => {
 
   const handleUpdate = async () => {
     try {
-      
+
       await updateTodo(db, {
         id,
         title,
@@ -47,7 +49,7 @@ const TaskDetailScreen = () => {
         completed: false
       })
       navigation.goBack()
-    } catch(error) {
+    } catch (error) {
       console.log(error)
     }
   }
@@ -62,7 +64,7 @@ const TaskDetailScreen = () => {
         completed: false,
       })
       navigation.goBack()
-    } catch(error) {
+    } catch (error) {
       console.log(error)
     }
   }
@@ -87,25 +89,29 @@ const TaskDetailScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme === 'light' ? Colors.light.primary : Colors.dark.primary }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme === 'light' ? Colors.light.primary : Colors.dark.primary },
+      { borderBottomColor: theme === 'light' ? Colors.light.border : Colors.dark.border }]}>
         <TouchableOpacity style={styles.backButton}
           onPress={() => navigation.goBack()}>
-          <Text style={styles.backButtonText}>‹</Text>
+          <Text style={[styles.backButtonText, {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}>‹</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>
+        <Text style={[styles.headerTitle, { color: theme === 'light' ? Colors.light.text : Colors.dark.text }]}>
           {id ? 'Chỉnh sửa Task' : 'Thêm Task Mới'}
         </Text>
         <View style={styles.placeholder} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.content, {backgroundColor: theme === 'light' ? Colors.light.primary : Colors.dark.primary}]} showsVerticalScrollIndicator={false}>
         {/* Title Input */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Tiêu đề *</Text>
+          <Text style={[styles.label, {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}>Tiêu đề *</Text>
           <TextInput
-            style={styles.titleInput}
+            style={[styles.titleInput, 
+              {backgroundColor: theme === 'light' ? Colors.light.primary : Colors.dark.primary},
+              {borderColor: theme === 'light' ? Colors.light.border : Colors.dark.border},
+              {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}
             placeholder="Nhập tiêu đề task..."
             value={title}
             onChangeText={setTitle}
@@ -114,9 +120,12 @@ const TaskDetailScreen = () => {
         </View>
         {/* Description Input */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Mô tả</Text>
+          <Text style={[styles.label, {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}>Mô tả</Text>
           <TextInput
-            style={styles.descriptionInput}
+            style={[styles.descriptionInput, 
+              {backgroundColor: theme === 'light' ? Colors.light.primary : Colors.dark.primary},
+              {borderColor: theme === 'light' ? Colors.light.border : Colors.dark.border},
+              {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}
             placeholder="Nhập mô tả chi tiết..."
             value={description}
             onChangeText={setDescription}
@@ -129,34 +138,38 @@ const TaskDetailScreen = () => {
 
         {/* Deadline Section */}
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Deadline</Text>
+          <Text style={[styles.label, {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}>Deadline</Text>
           {/**Date*/}
-          <View style={styles.deadlineButtonContainer}> 
+          <View style={styles.deadlineButtonContainer}>
             <TouchableOpacity
-            style={styles.deadlineButton}
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Text style={styles.deadlineText}>
-              {deadline.toLocaleDateString('vi-VN', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </Text>
-          </TouchableOpacity>
+              style={[styles.deadlineButton, 
+                {backgroundColor: theme === 'light' ? Colors.light.primary : Colors.dark.primary},
+                {borderColor: theme === 'light' ? Colors.light.border : Colors.dark.border},]}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text style={[styles.deadlineText, {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}>
+                {deadline.toLocaleDateString('vi-VN', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </Text>
+            </TouchableOpacity>
 
-          {/**Time*/}
-          <TouchableOpacity
-            style={styles.deadlineButton}
-            onPress={() => setShowTimePicker(true)}
-          >
-            <Text style={styles.deadlineText}>
-              {deadline.toLocaleTimeString('vi-VN', {
-                hourCycle:'h24'
-              })}
-            </Text>
-          </TouchableOpacity>
+            {/**Time*/}
+            <TouchableOpacity
+              style={[styles.deadlineButton, 
+                {backgroundColor: theme === 'light' ? Colors.light.primary : Colors.dark.primary},
+                {borderColor: theme === 'light' ? Colors.light.border : Colors.dark.border},]}
+              onPress={() => setShowTimePicker(true)}
+            >
+              <Text style={[styles.deadlineText, {color: theme === 'light' ? Colors.light.text : Colors.dark.text}]}>
+                {deadline.toLocaleTimeString('vi-VN', {
+                  hourCycle: 'h24'
+                })}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
         {/* Date Picker */}
@@ -183,11 +196,11 @@ const TaskDetailScreen = () => {
 
         {/* Save Button */}
         <TouchableOpacity
-          style={[styles.saveButton, !title.trim() && styles.saveButtonDisabled]}
+          style={[styles.saveButton, !title.trim() && styles.saveButtonDisabled, {backgroundColor: theme === 'light' ? Colors.light.accent : Colors.dark.accent}]}
           onPress={id ? handleUpdate : handleAdd}
           disabled={!title.trim()}
         >
-          <Text style={styles.saveButtonText}>
+          <Text style={[styles.saveButtonText, {color: theme === 'light' ? Colors.light.primary : Colors.dark.primary}]}>
             {id ? 'Cập nhật Task' : 'Tạo Task'}
           </Text>
         </TouchableOpacity>
@@ -198,7 +211,7 @@ const TaskDetailScreen = () => {
             style={styles.markCompleteButton}
             onPress={handleStatus}
           >
-            <Text style={styles.markCompleteText}>
+            <Text style={[styles.markCompleteText, {color: theme === 'light' ? Colors.light.textSecondary : Colors.dark.textSecondary}]}>
               {completed ? 'Đánh dấu là chưa hoàn thành' : 'Đánh dấu là đã hoàn thành'}
             </Text>
           </TouchableOpacity>
@@ -213,7 +226,6 @@ export default TaskDetailScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
   },
   header: {
     flexDirection: 'row',
@@ -222,24 +234,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     paddingTop: 20,
     paddingBottom: 20,
-    backgroundColor: '#fff',
   },
   backButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
     paddingVertical: 5,
     paddingHorizontal: 5,
   },
   backButtonText: {
     fontSize: 24,
-    color: '#495057',
     fontWeight: '300',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#212529',
   },
   placeholder: {
     width: 40,
@@ -254,35 +262,28 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#495057',
     marginBottom: 8,
   },
   titleInput: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#e9ecef',
   },
   descriptionInput: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#e9ecef',
     minHeight: 100,
   },
   deadlineButton: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: '#e9ecef',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -316,7 +317,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 60,
     paddingVertical: 16,
-    backgroundColor: '#f8f9fa',
 
   },
   markCompleteText: {
