@@ -207,8 +207,8 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    right: 40,
-    top: 580,
+    right: 10,
+    bottom: 10,
     width: 56,
     height: 56,
     alignItems: 'center',
@@ -216,6 +216,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     elevation: 5,
     backgroundColor: '#add8e6',
+    zIndex: 100
   },
   fabText: {
     color: '#fff',

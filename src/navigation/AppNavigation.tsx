@@ -16,9 +16,9 @@ function MainTabs() {
       tabBarIcon: ({focused, color, size}) => {
         let iconName = '';
         if (route.name === 'TodoList') {
-          iconName = focused ? 'list' : 'list-outlined';
+          iconName = focused ? 'list' : 'list';
         } else if (route.name === 'Settings') {
-          iconName = focused ? 'settings' : 'settings-outlined';
+          iconName = focused ? 'settings' : 'settings';
         }
         return <MaterialIcons name={iconName} size={size} color={color} />;
       },
